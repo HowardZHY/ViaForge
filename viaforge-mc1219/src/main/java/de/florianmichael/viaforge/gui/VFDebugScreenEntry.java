@@ -22,14 +22,11 @@ import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import de.florianmichael.viaforge.common.ViaForgeCommon;
 import net.minecraft.client.gui.components.debug.DebugScreenDisplayer;
 import net.minecraft.client.gui.components.debug.DebugScreenEntry;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.Nullable;
 
 public final class VFDebugScreenEntry implements DebugScreenEntry {
-
-    public static final ResourceLocation ID = ResourceLocation.tryBuild("viaforge", "viaforge");
 
     @Override
     public void display(final DebugScreenDisplayer p_427172_, @Nullable final Level p_427695_, @Nullable final LevelChunk p_423462_, @Nullable final LevelChunk p_426762_) {

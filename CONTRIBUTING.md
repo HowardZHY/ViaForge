@@ -1,7 +1,7 @@
 # Contributing guidelines for the project
 
 ## Setting up a Workspace
-ViaFabricPlus uses Gradle, to make sure that it is installed properly you can check [Gradle's website](https://gradle.org/install/).
+ViaForge uses Gradle, to make sure that it is installed properly you can check [Gradle's website](https://gradle.org/install/).
 1. Clone the repository using `git clone https://github.com/ViaVersion/ViaForge`.
 2. CD into the local repository.
 3. Run `./gradlew build`.

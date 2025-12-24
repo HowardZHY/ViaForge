@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.florianmichael.viaforge.mixin.connect;
+package de.florianmichael.viaforge.mixin.connect.v21_10;
 
 import de.florianmichael.viaforge.common.ViaForgeCommon;
 import de.florianmichael.viaforge.common.gui.ExtendedServerData;
@@ -25,7 +25,9 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.ServerStatusPinger;
 import net.minecraft.network.Connection;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import net.minecraft.server.network.EventLoopGroupHolder;
 import net.minecraft.util.debugchart.LocalSampleLogger;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,21 +43,28 @@ public class MixinServerStatusPinger {
     @Unique
     private ServerData viaForge$serverData;
 
+    @Dynamic
     @Inject(method = "pingServer", at = @At("HEAD"))
-    public void trackServerData(ServerData p_105460_, Runnable p_105461_, Runnable p_335024_, CallbackInfo ci) {
-        viaForge$serverData = p_105460_;
+    public void trackServerData(ServerData data, Runnable p_105461_, Runnable p_335024_, CallbackInfo ci) {
+        viaForge$serverData = data;
     }
 
+    @SuppressWarnings("JavaReflectionMemberAccess")
+    @Dynamic
     @Redirect(method = "pingServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;connectToServer(Ljava/net/InetSocketAddress;ZLnet/minecraft/util/debugchart/LocalSampleLogger;)Lnet/minecraft/network/Connection;"))
-    public Connection trackVersion(InetSocketAddress inetSocketAddress, boolean b, LocalSampleLogger localSampleLogger) {
+    public Connection trackVersion(InetSocketAddress address, boolean b, LocalSampleLogger localSampleLogger) {
         ProtocolVersion version = ((ExtendedServerData) viaForge$serverData).viaForge$getVersion();
         if (version == null) {
             version = ViaForgeCommon.getManager().getTargetVersion();
         }
-        VersionTracker.storeServerProtocolVersion(inetSocketAddress.getAddress(), version);
+        VersionTracker.storeServerProtocolVersion(address.getAddress(), version);
         viaForge$serverData = null;
-
-        return Connection.connectToServer(inetSocketAddress, b, localSampleLogger);
+        try {
+            return (Connection) Connection.class
+                    .getDeclaredMethod("connectToServer", InetSocketAddress.class, boolean.class, LocalSampleLogger.class)
+                    .invoke(null, address, b, localSampleLogger);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 }

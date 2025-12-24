@@ -40,7 +40,6 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
-@SuppressWarnings("DataFlowIssue")
 public class GuiProtocolSelector extends Screen {
 
     /**

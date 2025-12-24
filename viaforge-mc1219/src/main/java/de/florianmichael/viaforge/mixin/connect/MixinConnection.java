@@ -20,10 +20,8 @@ package de.florianmichael.viaforge.mixin.connect;
 
 import com.viaversion.vialoader.netty.VLLegacyPipeline;
 import de.florianmichael.viaforge.common.ViaForgeCommon;
-import de.florianmichael.viaforge.common.platform.VersionTracker;
 import de.florianmichael.viaforge.common.protocoltranslator.netty.VFNetworkManager;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import net.minecraft.network.CipherDecoder;
 import net.minecraft.network.CipherEncoder;
 import net.minecraft.network.Connection;
@@ -35,10 +33,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.crypto.Cipher;
-import java.net.InetSocketAddress;
 
 @Mixin(Connection.class)
 public class MixinConnection implements VFNetworkManager {
@@ -46,6 +42,7 @@ public class MixinConnection implements VFNetworkManager {
     @Shadow private Channel channel;
 
     @Shadow private boolean encrypted;
+
     @Unique
     private Cipher viaForge$decryptionCipher;
 
@@ -72,12 +69,6 @@ public class MixinConnection implements VFNetworkManager {
             this.encrypted = true;
             this.channel.pipeline().addBefore(VLLegacyPipeline.VIALEGACY_PRE_NETTY_LENGTH_REMOVER_NAME, "encrypt", new CipherEncoder(p_244777_2_));
         }
-    }
-
-    @Inject(method = "connect", at = @At("HEAD"))
-    private static void setTargetVersion(InetSocketAddress p_290034_, boolean p_290035_, Connection p_290031_, CallbackInfoReturnable<ChannelFuture> cir) {
-        final VFNetworkManager mixinConnection = (VFNetworkManager) p_290031_;
-        mixinConnection.viaForge$setTrackedVersion(VersionTracker.getServerProtocolVersion(p_290034_.getAddress()));
     }
 
     @Override

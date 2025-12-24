@@ -3,3 +3,12 @@
 minecraft {
     reobf = false // Official mappings at runtime for 1.20.5+
 }
+
+sourceSets {
+    dummy {
+        compileClasspath += main.compileClasspath
+    }
+    main {
+        compileClasspath += dummy.output
+    }
+}

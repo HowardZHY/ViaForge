@@ -31,6 +31,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     private static boolean is21_9;
 
+    private static boolean is21_11;
+
     @Override
     public void onLoad(String mixinPackage) {}
 
@@ -45,6 +47,11 @@ public class MixinPlugin implements IMixinConfigPlugin {
             return !is21_9;
         } else if (mixinClassName.contains("21_9")) {
             return is21_9;
+        }
+        if (mixinClassName.contains("21_10")) {
+            return !is21_11;
+        } else if (mixinClassName.contains("21_11")) {
+            return is21_11;
         }
         return true;
     }
@@ -77,6 +84,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
             String[] parts = version.split("\\.");
             if (parts.length > 2) {
                 is21_9 = Integer.parseInt(parts[2]) > 8;
+                is21_11 =  Integer.parseInt(parts[2]) > 10;
             }
         } else {
             Method current = null;
