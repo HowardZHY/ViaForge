@@ -19,6 +19,7 @@
 package de.florianmichael.viaforge.mixin;
 
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.VersionInfo;
 import org.apache.logging.log4j.LogManager;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -70,6 +71,15 @@ public class MixinPlugin implements IMixinConfigPlugin {
     @Override
     public void postApply(String name, ClassNode targetClass, String mixin, IMixinInfo iMixinInfo) {}
 
+    private static int parseVersion(String version) {
+        String[] parts = version.split("\\.");
+        if (parts.length > 2) {
+            return Integer.parseInt(parts[2]);
+        } else {
+            return 0;
+        }
+    }
+
     static {
         String version;
         boolean lex = false;
@@ -80,19 +90,27 @@ public class MixinPlugin implements IMixinConfigPlugin {
         }
         if (lex) {
             version = net.minecraftforge.fml.loading.FMLLoader.versionInfo().mcVersion();
-            LogManager.getLogger("ViaForge").info("Detected: {}", version);
-            String[] parts = version.split("\\.");
-            if (parts.length > 2) {
-                is21_9 = Integer.parseInt(parts[2]) > 8;
-                is21_11 =  Integer.parseInt(parts[2]) > 10;
-            }
+            LogManager.getLogger("ViaForge").info("Detected: {} LexForge", version);
+            is21_9 = parseVersion(version) > 8;
+            is21_11 = parseVersion(version) > 10;
         } else {
             Method current = null;
             try {
                 current = FMLLoader.class.getDeclaredMethod("getCurrent");
-            } catch (Exception ignored) {}
+            } catch (ReflectiveOperationException ignored) {}
             if (current != null) {
                 is21_9 = true;
+                try {
+                    VersionInfo info = (VersionInfo) FMLLoader.class.
+                        getDeclaredMethod("getVersionInfo").invoke(current.invoke(null));
+                    version = info.mcVersion();
+                    LogManager.getLogger("ViaForge").info("Detected: {} NeoForge", version);
+                    is21_11 = parseVersion(version) > 10;
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                LogManager.getLogger("ViaForge").info("Detected 1.21.8 or earlier NeoForge");
             }
         }
     }
